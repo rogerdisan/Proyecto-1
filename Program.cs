@@ -171,4 +171,109 @@ void ProcesarEvaluacion(string tipo, int duracion, string clasificacion, int hor
                 razonRechazo = "Producción baja no es válida para contenido +18";
             }
         }
-    } 
+    
+    string impacto = "";
+    string decision = "";
+    string razonDecision = "";
+
+    if (!validTecnica)
+    {
+        decision = "RECHAZAR";
+        razonDecision = razonRechazo;
+    }
+    else
+    {
+        impacto = ClasificarImpacto(produccion, duracion, hora);
+
+        if (impacto == "Alto")
+        {
+            decision = "ENVIAR A REVISIÓN";
+            razonDecision = "Cumple reglas técnicas pero tiene impacto Alto";
+        }
+        else if (impacto == "Bajo" || impacto == "Medio")
+        {
+            decision = "PUBLICAR";
+            razonDecision = "Cumple todas las reglas técnicas con impacto " + impacto;
+        }
+    }
+
+    if (validTecnica)
+    {
+        Console.Write("  Impacto     : ");
+        if (impacto == "Alto") Console.ForegroundColor = ConsoleColor.Red;
+        else if (impacto == "Medio") Console.ForegroundColor = ConsoleColor.Yellow;
+        else Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine(impacto);
+        Console.ResetColor();
+    }
+
+    Console.Write("  Decisión    : ");
+    if (decision == "PUBLICAR") Console.ForegroundColor = ConsoleColor.Green;
+    else if (decision == "ENVIAR A REVISIÓN") Console.ForegroundColor = ConsoleColor.Yellow;
+    else Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine(decision);
+    Console.ResetColor();
+
+    Console.WriteLine($"  Razón       : {razonDecision}");
+
+    ActualizarEstadisticas(decision, impacto, validTecnica);
+
+    Console.WriteLine();
+    Console.ForegroundColor = ConsoleColor.White;
+    Console.WriteLine("Presione cualquier tecla para continuar...");
+    Console.ResetColor();
+    Console.ReadKey();
+}
+
+bool ValidarDuracion(string tipo, int duracion, ref string razon)
+{
+    bool valida = true;
+
+    if (tipo == "pelicula")
+    {
+        if (duracion < 60 || duracion > 180)
+        {
+            valida = false;
+            razon = $"Película debe durar entre 60 y 180 min (ingresado: {duracion} min)";
+        }
+    }
+    else if (tipo == "serie")
+    {
+        if (duracion < 20 || duracion > 90)
+        {
+            valida = false;
+            razon = $"Serie debe durar entre 20 y 90 min (ingresado: {duracion} min)";
+        }
+    }
+    else if (tipo == "documental")
+    {
+        if (duracion < 30 || duracion > 120)
+        {
+            valida = false;
+            razon = $"Documental debe durar entre 30 y 120 min (ingresado: {duracion} min)";
+        }
+    }
+    else if (tipo == "evento")
+    {
+        if (duracion < 30 || duracion > 240)
+        {
+            valida = false;
+            razon = $"Evento en vivo debe durar entre 30 y 240 min (ingresado: {duracion} min)";
+        }
+    }
+
+    return valida;
+}
+
+string ClasificarImpacto(string produccion, int duracion, int hora)
+{
+    bool esAlto = (produccion == "alto") || (duracion > 120) || (hora >= 20 && hora <= 23);
+    bool esMedio = (produccion == "medio") || (duracion >= 60 && duracion <= 120);
+    bool esBajo = (produccion == "bajo") && (duracion < 60);
+
+    if (esAlto) return "Alto";
+    if (esMedio) return "Medio";
+    if (esBajo) return "Bajo";
+
+    return "Medio";
+} 
