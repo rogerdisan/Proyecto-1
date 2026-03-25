@@ -1,5 +1,5 @@
 ﻿using System;
-
+{ 
 int totalEvaluados = 0;
 int totalPublicados = 0;
 int totalRechazados = 0;
@@ -121,3 +121,54 @@ void EvaluarContenido()
     ProcesarEvaluacion(tipo, duracion, clasificacion, hora, produccion);
 }
 
+void ProcesarEvaluacion(string tipo, int duracion, string clasificacion, int hora, string produccion)
+    {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("\n══════════ RESULTADO DE EVALUACIÓN ══════════");
+        Console.ResetColor();
+
+        string tipoMostrar = ObtenerNombreTipo(tipo);
+        string prodMostrar = char.ToUpper(produccion[0]) + produccion.Substring(1);
+
+        Console.WriteLine($"  Tipo        : {tipoMostrar}");
+        Console.WriteLine($"  Duración    : {duracion} min");
+        Console.WriteLine($"  Clasificac. : {clasificacion}");
+        Console.WriteLine($"  Hora        : {hora}:00 hrs");
+        Console.WriteLine($"  Producción  : {prodMostrar}");
+        Console.WriteLine();
+
+        bool validTecnica = true;
+        string razonRechazo = "";
+
+        if (clasificacion == "+13")
+        {
+            if (hora < 6 || hora > 22)
+            {
+                validTecnica = false;
+                razonRechazo = "Contenido +13 solo permitido entre las 6:00 y 22:00 hrs";
+            }
+        }
+        else if (clasificacion == "+18")
+        {
+            if (hora < 22 && hora > 5)
+            {
+                validTecnica = false;
+                razonRechazo = "Contenido +18 solo permitido entre las 22:00 y 5:00 hrs";
+            }
+        }
+
+        if (validTecnica)
+        {
+            bool duracionValida = ValidarDuracion(tipo, duracion, ref razonRechazo);
+            if (!duracionValida) validTecnica = false;
+        }
+
+        if (validTecnica)
+        {
+            if (produccion == "bajo" && clasificacion == "+18")
+            {
+                validTecnica = false;
+                razonRechazo = "Producción baja no es válida para contenido +18";
+            }
+        }
+    } 
